@@ -119,14 +119,23 @@ const start = () => {
     });
   };
 
-  // 
+  // View all employees that is working in each department
   const viewEmpDept = () => {
-
+    connection.query("SELECT * FROM employee LEFT JOIN roles ON role_id = roles.id LEFT JOIN department ON department_id = department.id)", (err,results) => {
+      console.table(results);
+      start();
+    });
+    
   };
-  //
-  const viewEmpDept = () => {
 
+  //View all employees by each roles
+  const viewEmpRoles = () => {
+    connection.query("SELECT * FROM employee LEFT JOIN roles ON role_id = roles.id", (err,results) => {
+      console.table(results);
+      start();
+    });
   };
+
   // View list of employee working in one Manager
   const viewManagers = () => {
     connection.query("SELECT * FROM employee", (err, results) => {
@@ -139,7 +148,7 @@ const start = () => {
         })
         .then(
           // results.Map
-          "SELECT * FROM company_DB.employee WHERE manager_id = ?",
+          "SELECT * FROM employee WHERE manager_id = ?",
           manager_id
         );
       console.log(results);
@@ -254,6 +263,39 @@ const start = () => {
             function (err) {
               if (err) throw err;
               console.log("New role has been added!");
+              start();
+            }
+          );
+        });
+    });
+  };
+
+  // Add new department
+  const addDept = () => {
+    connection.query("SELECT * FROM roles", (err, res) => {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "deptName",
+            type: "input",
+            message: "What is the name of the new department?",
+          }
+        ])
+        .then(function (answer) {
+          for (let a = 0; a < res.length; a++) {
+            if (res[a].dep_name == answer.deptName) {
+              console.log(dep_name);
+            }
+          }
+          connection.query(
+            "INSERT INTO department SET ?",
+            {
+              dep_name: answer.deptName,
+            },
+            function (err) {
+              if (err) throw err;
+              console.log("New department has been added!");
               start();
             }
           );
