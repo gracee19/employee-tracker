@@ -29,18 +29,11 @@ const start = () => {
         "View all employees",
         "View all department",
         "View all roles",
-        "View all employees by department",
         "View all employees by manager",
         "View all employees by role",
         "Add employee",
         "Add role",
         "Add department",
-        "Update employee role",
-        "Update employee manager",
-        "Delete employee",
-        "Delete role",
-        "Delete department",
-        "View department budgets",
       ],
     })
     .then(({ choice }) => {
@@ -54,9 +47,7 @@ const start = () => {
         case "View all roles":
           viewRoles();
           break;
-        case "View all employees by departmet":
-          viewEmpDept();
-          break;
+        
         case "View all employees by manager":
           viewManagers();
           break;
@@ -70,24 +61,6 @@ const start = () => {
           addRole();
           break;
         case "Add department":
-          addDept();
-          break;
-        case "Update employee role":
-          uptEmp();
-          break;
-        case "Update employee manager":
-          addDept();
-          break;
-        case "Delete employee":
-          addDept();
-          break;
-        case "Delete role":
-          addDept();
-          break;
-        case "Delete department":
-          addDept();
-          break;
-        case "View department budget":
           addDept();
           break;
         default:
@@ -119,15 +92,6 @@ const start = () => {
     });
   };
 
-  // View all employees that is working in each department
-  const viewEmpDept = () => {
-    connection.query("SELECT * FROM employee LEFT JOIN roles ON role_id = roles.id LEFT JOIN department ON department_id = department.id)", (err,results) => {
-      console.table(results);
-      start();
-    });
-    
-  };
-
   //View all employees by each roles
   const viewEmpRoles = () => {
     connection.query("SELECT * FROM employee LEFT JOIN roles ON role_id = roles.id", (err,results) => {
@@ -138,21 +102,33 @@ const start = () => {
 
   // View list of employee working in one Manager
   const viewManagers = () => {
+
     connection.query("SELECT * FROM employee", (err, results) => {
+      //console.log(results);
+
+      const managerChoices = results.map(function(manager){
+        return {name:manager.first_name + manager.last_name, value: manager.id}
+      });
+      console.log(managerChoices)
       inquirer
         .prompt({
           name: "pickManager",
           type: "list",
           message: "Which manager do you want to check?",
-          choices: [],
+          choices: managerChoices,
         })
-        .then(
-          // results.Map
-          "SELECT * FROM employee WHERE manager_id = ?",
-          manager_id
-        );
-      console.log(results);
-      start();
+        .then(function(answer){
+          let manager_id;
+          // console.log(answer.pickManager.id);
+          connection.query("SELECT * FROM employee WHERE manager_id = ?", [answer.pickManager],
+          function (err, results) {
+            if (err) throw err;
+            console.table(results);
+            //console.log("Your employee has been added!");
+            start();
+          });
+        });
+      
     });
   };
 
@@ -194,7 +170,7 @@ const start = () => {
           let role_id;
           for (let a = 0; a < res.length; a++) {
             if (res[a].title == answer.role) {
-              role_id = res[a].id;
+              role_id = res[a].id;   
               console.log(role_id);
             }
           }
